@@ -1,5 +1,5 @@
 class Contato {
-    constructor(nome, telfix, telcll, url, data, email, cep, cidade, ig, github) {
+    constructor(nome, telfix, telcll, url, data, email, cep, cidade, ig, github, id) {
         this.nome = nome;
         this.telfix = telfix;
         this.telcll = telcll;
@@ -12,6 +12,7 @@ class Contato {
         this.github = github;
         this.age = this.calculateAge();
         this.zodiacSign = this.getZodiacSign();
+        this.id = this.generateId();
     }
 
     calculateAge() {
@@ -60,6 +61,9 @@ class Contato {
             return "Sagitário ♐";
         }
     }
+    generateId() {
+        return Math.floor(Math.random() * 3000);
+    }
 }
 
 class Contatos {
@@ -77,8 +81,15 @@ class Contatos {
             sendMsg("Insira CEP válido!")
         } else {
             this.contatos.push(contato);
+
             clearInputs();
         }
+    }
+    buscar(id) {
+        return this.contatos.find(contato => contato.id == id);
+    }
+    remove(id){
+        this.contatos = this.contatos.filter(contato => contato.id == id);
     }
 }
 
@@ -100,7 +111,6 @@ function criarContato() {
 
     contatos.adicionar(contato);
 
-    renderizarctt()
 }
 
 function isAnyInputEmpty() {
@@ -123,7 +133,6 @@ function isAnyInputEmpty() {
         return false;
     }
 }
-
 
 function isURLValida(url) {
     if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
@@ -169,18 +178,12 @@ function clearInputs() {
     document.getElementById("data-input").value = "";
     document.getElementById("email-input").value = "";
     document.getElementById("cep-input").value = "";
-    document.getElementById("cidade-input").value;
+    document.getElementById("cidade-input").value = "";
     document.getElementById("ig-input").value = "";
     document.getElementById("github-input").value = "";
 }
 
-function dateinPTBR(data) {
-    console.log("Passou pela funcao dateinPTBR()");
 
-    let dateArray = data.split("-");
-    let datePTBR = dateArray[2] + "/" + dateArray[1] + "/" + dateArray[0];
-    return datePTBR;
-}
 
 function validaNumero() {
     let telfix = document.getElementById("telfix-input").value;
@@ -235,35 +238,27 @@ function renderizarctt() {
 
     array.forEach(contato => {
         cttDiv += `
-        <div class="card" onclick="renderizardetalhe()">
+        <div class="card" onclick="renderizardetalhe(${contato.id})" id="${contato.url}">
         <img src="${contato.url}">
         <h3>${contato.nome}</h3>
         <p>Telefone fixo: ${formatedCellphone(contato.telfix)}</p>
         <p>Telefone celular: ${formatedCellphone(contato.telcll)}</p>
     </div>
         `;
-        listHTML.innerHTML += cttDiv;
-    });
+    })
+    listHTML.innerHTML = cttDiv;
+    ;
 }
 
-function createID(){
-    let id = parseInt(Math.random() * 998);
-    let tag = "";
-    
-    return id+=tag;
-}
-
-function renderizardetalhe() {
+function renderizardetalhe(id) {
+    const contato = contatos.buscar(id);
     const listHTML = document.getElementById('detalhe-box');
     listHTML.innerHTML = '';
-    let array = contatos.contatos;
     let detalheDiv = '';
-
-    array.forEach(contato => {
-        detalheDiv += `
+    detalheDiv = `
             <div class="card-detalhe">
             <img src="${contato.url}">
-            <p> ID: ${createID.id}</p>
+            <p> ID: ${contato.id}</p>
             <h3>${contato.nome}</h3>
             <p>Telefone fixo: ${formatedCellphone(contato.telfix)}</p>
             <p>Telefone celular: ${formatedCellphone(contato.telcll)}</p>
@@ -275,6 +270,7 @@ function renderizardetalhe() {
             <p>Cidade: ${contato.cidade}</p>
             <p>Instagram: ${contato.ig}</p>
             <p>Github: ${contato.github}</p>
+            <button type="button" onclick="excluir(${contato.id})">EXCLUIR</button>
             <div class="incons-box">
             <img src="assets/images/wpp.png">
             <img src="assets/images/ig.png">
@@ -282,7 +278,15 @@ function renderizardetalhe() {
         </div>
         </div>
             `;
-        listHTML.innerHTML += detalheDiv;
-    });
+    listHTML.innerHTML += detalheDiv;
 
+    detalheDiv = "";
+
+}
+
+function excluir(id){
+    contatos.remove(id)
+
+    renderizarctt()
+    renderizardetalhe()
 }
